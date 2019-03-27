@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    //MainActivity
+    <dimen name="title_text_size">60sp</dimen>
+    <dimen name="start_button_width">150dp</dimen>
+    <dimen name="start_button_text_size">30sp</dimen>
+
+    //Select_Image
+    <dimen name="upload_button_width">200dp</dimen>
+    <dimen name="upload_button_text_size">25sp</dimen>
+
+    //Loading Screen
+    <dimen name="loading_text_size">30sp</dimen>
+
+</resources>
