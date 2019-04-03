@@ -7,7 +7,12 @@ import android.accounts.AccountManagerFuture;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,6 +29,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 
+import java.io.IOException;
+
 public class LoadingScreen extends AppCompatActivity {
     ImageView imageView;
     ProgressBar progressBar;
@@ -32,20 +39,74 @@ public class LoadingScreen extends AppCompatActivity {
     Button sign_in;
     Process_Image process_image;
 
+    Bitmap image;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading_screen);
         imageView = findViewById(R.id.imageView);
-        imageView.setImageURI(getIntent().getData());
+        Uri selectedImage = getIntent().getData();
+        imageView.setImageURI(selectedImage);
+        Bitmap grey_square = createImage();
 
+        imageView.setImageBitmap(grey_square);
+
+
+        try {
+            image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+        }
+        catch(IOException io){
+            System.out.println(io.getMessage());
+        }
+
+        float height = image.getHeight();
+        float width = image.getWidth();
+
+        float x_offset = 0;
+        float y_offset = 0;
+
+        if(height >= width){
+            width = Math.round((200/height)*width);
+            height = 200;
+
+            x_offset = (200 - width)/2;
+        }
+        else{
+            height = Math.round((200/width)*height);
+            width = 200;
+
+            y_offset = (200 - height)/2;
+        }
+
+        int i_width = (int) width;
+        int i_height = (int) height;
+
+        int i_x_offset = (int) x_offset;
+        int i_y_offset = (int) y_offset;
+
+        Bitmap scaled_image = Bitmap.createScaledBitmap(image, i_width, i_height, true);
+
+        imageView.setImageBitmap(scaled_image);
+        int pix_x_si = 0;
+        int pix_y_si = 0;
+        for(int pix_x = i_x_offset; pix_x < i_width + i_x_offset; pix_x++){
+            for(int pix_y = i_y_offset; pix_y < i_height + i_y_offset; pix_y++){
+                System.out.println("PIX_Y_SI: " + pix_y_si + " PIX_Y: " + pix_y);
+                grey_square.setPixel(pix_x, pix_y,
+                        scaled_image.getPixel(pix_x_si, pix_y_si));
+                pix_y_si++;
+            }
+            pix_y_si = 0;
+            pix_x_si++;
+        }
+
+        imageView.setImageBitmap(grey_square);
         sign_in = findViewById(R.id.sign_in);
 
         progressBar = findViewById(R.id.progressBar);
 
-        System.out.println("CHECK HERE");
         AccountManager am = AccountManager.get(this); // "this" references the current Context
-        System.out.println("AND HERE");
         Account[] accounts = am.getAccountsByType("com.google");
         System.out.println("ACCOUNTS: " + accounts[0]);
         Account myAccount_ = accounts[0];
@@ -59,21 +120,6 @@ public class LoadingScreen extends AppCompatActivity {
                 new OnTokenAcquired(),          // Callback called when a token is successfully acquired
                 new Handler(new OnError()));    // Callback called if an error occurs
 
-        System.out.println("OK WE GOT PAST IT");
-
-//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                .requestEmail()
-//                .build();
-//
-//        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-//
-//        sign_in.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                signIn();
-//            }
-//        });
-//        process_image.execute();
     }
 
     private class OnTokenAcquired implements AccountManagerCallback<Bundle> {
@@ -84,7 +130,7 @@ public class LoadingScreen extends AppCompatActivity {
                 Bundle bundle = result.getResult();
                 String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
                 System.out.println("TOKEN: " + token);
-                process_image = new Process_Image(progressBar, token);
+                process_image = new Process_Image(progressBar, token, image);
                 process_image.execute();
             }
             catch(Exception e){
@@ -102,31 +148,15 @@ public class LoadingScreen extends AppCompatActivity {
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-//        if (requestCode == RC_SIGN_IN) {
-//            // The Task returned from this call is always completed, no need to attach
-//            // a listener.
-//            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-//            handleSignInResult(task);
-//        }
-//    }
-
-//    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-//
-//        try {
-//            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-//
-//            Toast.makeText(getApplicationContext(),"Success",Toast.LENGTH_SHORT).show();
-//            Process_Image process_image = new Process_Image(progressBar);
-//            process_image.execute();
-//
-//        } catch (ApiException e) {
-//            Toast.makeText(getApplicationContext(),"Failer",Toast.LENGTH_SHORT).show();
-//        }
-//    }
+    public static Bitmap createImage() {
+        int width = 200;
+        int height = 200;
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setARGB(100, 132,132,132);
+        canvas.drawRect(0F, 0F, (float) width, (float) height, paint);
+        return bitmap;
+    }
 
 }

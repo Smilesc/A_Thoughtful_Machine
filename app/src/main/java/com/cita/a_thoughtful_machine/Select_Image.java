@@ -55,6 +55,7 @@ public class Select_Image extends AppCompatActivity {
 
         if(requestCode==REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             selectedImage = data.getData();
+            System.out.println("IMAGE THINGS HERE: " + selectedImage);
             imageView.setImageURI(selectedImage);
         }
     }

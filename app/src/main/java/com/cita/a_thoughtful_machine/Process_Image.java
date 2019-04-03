@@ -1,10 +1,19 @@
 package com.cita.a_thoughtful_machine;
 
 import android.accounts.AccountManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
+import android.support.annotation.ColorInt;
+import android.support.annotation.Dimension;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.View;
@@ -32,10 +41,13 @@ class Process_Image extends AsyncTask<Void, Void, String> {
     ProgressBar progressBar;
     String token;
     HttpURLConnection conn;
+    Bitmap image;
+    Bitmap grey_square;
 
-    public Process_Image(ProgressBar p, String token){
+    public Process_Image(ProgressBar p, String token, Bitmap image){
         this.progressBar = p;
         this.token = token;
+        this.image = image;
     }
     protected void onPreExecute() {
         progressBar.setVisibility(View.VISIBLE);
@@ -43,18 +55,10 @@ class Process_Image extends AsyncTask<Void, Void, String> {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     protected String doInBackground(Void... urls) {
+
+
         try {
-//            URL url = new URL("https://accounts.google.com/o/oauth2/v2/auth?" +
-//                    "scope=email%20profile&" +
-//                    "response_type=code&" +
-//                    "redirect_uri=urn:ietf:wg:oauth:2.0:oob&" +
-//                    "client_id=1044392821881-63md27vb097bvljo0v01pq5bhvnju09m.apps.googleusercontent.com");
-//            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-
-//            BufferedReader in = new BufferedReader(new InputStreamReader(
-//                    urlConnection.getInputStream()));
-
-            URL url = new URL("https://ml.googleapis.com/v1/projects/a-thoughtful-machine/models/atm_model1:predict?key=" + "AIzaSyD5sgm-CZTp8gJ4_JYBEU4atdczSIdTKe8");
+            URL url = new URL("https://ml.googleapis.com/v1/projects/a-thoughtful-machine/models/atm_model1:predict?key=" + "AIzaSyB8FlL0vRUzKXtiqodjjAXp9p7m4xj6a60");
            conn = (HttpURLConnection) url.openConnection();
             //conn.setDoInput(true);
             conn.addRequestProperty("client_id", "1044392821881-63md27vb097bvljo0v01pq5bhvnju09m.apps.googleusercontent.com");
@@ -62,14 +66,14 @@ class Process_Image extends AsyncTask<Void, Void, String> {
             conn.setRequestProperty("Authorization", "OAuth " + token);
             //conn.setDoOutput(true);
             conn.setRequestMethod("POST");
-//            OutputStream os = conn.getOutputStream();
-//            OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
-//
-//            osw.write(R.string.image_body);
-//            osw.flush();
-//            osw.close();
-//            os.close();  //don't forget to close the OutputStream
-//            conn.connect();
+            OutputStream os = conn.getOutputStream();
+            OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+
+            //osw.write(R.string.image_body);
+            osw.flush();
+            osw.close();
+            os.close();  //don't forget to close the OutputStream
+            conn.connect();
 
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
@@ -97,7 +101,10 @@ class Process_Image extends AsyncTask<Void, Void, String> {
         progressBar.setVisibility(View.GONE);
         Log.i("INFO", response);
         System.out.println("response: " + response);
-//        responseView.setText(response);
+
     }
+
+
+
 }
 
