@@ -4,9 +4,9 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
-import android.content.Context;
+
 import android.content.Intent;
-import android.content.SharedPreferences;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -15,21 +15,20 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
+
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class LoadingScreen extends AppCompatActivity {
     ImageView imageView;
@@ -40,6 +39,7 @@ public class LoadingScreen extends AppCompatActivity {
     Process_Image process_image;
 
     Bitmap image;
+    JSONObject obj;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,9 +48,9 @@ public class LoadingScreen extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
         Uri selectedImage = getIntent().getData();
         imageView.setImageURI(selectedImage);
-        Bitmap grey_square = createImage();
+        Bitmap cropped_image = createImage();
 
-        imageView.setImageBitmap(grey_square);
+        imageView.setImageBitmap(cropped_image);
 
 
         try {
@@ -92,8 +92,7 @@ public class LoadingScreen extends AppCompatActivity {
         int pix_y_si = 0;
         for(int pix_x = i_x_offset; pix_x < i_width + i_x_offset; pix_x++){
             for(int pix_y = i_y_offset; pix_y < i_height + i_y_offset; pix_y++){
-                System.out.println("PIX_Y_SI: " + pix_y_si + " PIX_Y: " + pix_y);
-                grey_square.setPixel(pix_x, pix_y,
+                cropped_image.setPixel(pix_x, pix_y,
                         scaled_image.getPixel(pix_x_si, pix_y_si));
                 pix_y_si++;
             }
@@ -101,7 +100,47 @@ public class LoadingScreen extends AppCompatActivity {
             pix_x_si++;
         }
 
-        imageView.setImageBitmap(grey_square);
+        imageView.setImageBitmap(cropped_image);
+
+        int[] img_argb = new int[40000];
+        cropped_image.getPixels(img_argb,0,i_width,0,0,i_width,i_height);
+
+        List<Integer> img_rgb = new ArrayList<>();
+
+        int[][] img_test = new int[1][120000];
+
+        int i = 0;
+
+        for (int y = 0; y < i_height; y++) {
+            for (int x = 0; x < i_width; x++) {
+                int index = y * i_width + x;
+
+                int R = (img_argb[index] >> 16) & 0xff;     //bitwise shifting
+                int G = (img_argb[index] >> 8) & 0xff;
+                int B = img_argb[index] & 0xff;
+
+                img_test[0][i] = R;
+                img_test[0][i + 1] = G;
+                img_test[0][i + 2] = B;
+                i+=3;
+
+                img_rgb.add(R);
+                img_rgb.add(G);
+                img_rgb.add(B);
+            }
+
+        }
+
+        try {
+            JSONArray jsonArray = new JSONArray(img_test);
+            obj = new JSONObject();
+
+            obj.put("instances", jsonArray);
+        }
+
+        catch(org.json.JSONException je){
+            System.out.println(je.getMessage());
+        }
         sign_in = findViewById(R.id.sign_in);
 
         progressBar = findViewById(R.id.progressBar);
@@ -130,7 +169,7 @@ public class LoadingScreen extends AppCompatActivity {
                 Bundle bundle = result.getResult();
                 String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
                 System.out.println("TOKEN: " + token);
-                process_image = new Process_Image(progressBar, token, image);
+                process_image = new Process_Image(progressBar, token, image, obj);
                 process_image.execute();
             }
             catch(Exception e){
@@ -154,7 +193,7 @@ public class LoadingScreen extends AppCompatActivity {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
-        paint.setARGB(100, 132,132,132);
+        paint.setARGB(255, 132,132,132);
         canvas.drawRect(0F, 0F, (float) width, (float) height, paint);
         return bitmap;
     }

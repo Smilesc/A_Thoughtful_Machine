@@ -19,6 +19,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -42,12 +44,14 @@ class Process_Image extends AsyncTask<Void, Void, String> {
     String token;
     HttpURLConnection conn;
     Bitmap image;
-    Bitmap grey_square;
+    Bitmap cropped_image;
+    JSONObject obj;
 
-    public Process_Image(ProgressBar p, String token, Bitmap image){
+    public Process_Image(ProgressBar p, String token, Bitmap image, JSONObject obj){
         this.progressBar = p;
         this.token = token;
         this.image = image;
+        this.obj = obj;
     }
     protected void onPreExecute() {
         progressBar.setVisibility(View.VISIBLE);
@@ -58,7 +62,7 @@ class Process_Image extends AsyncTask<Void, Void, String> {
 
 
         try {
-            URL url = new URL("https://ml.googleapis.com/v1/projects/a-thoughtful-machine/models/atm_model1:predict?key=" + "AIzaSyB8FlL0vRUzKXtiqodjjAXp9p7m4xj6a60");
+            URL url = new URL("https://ml.googleapis.com/v1/projects/a-thoughtful-machine/models/atm_model1:predict?key=");
            conn = (HttpURLConnection) url.openConnection();
             //conn.setDoInput(true);
             conn.addRequestProperty("client_id", "1044392821881-63md27vb097bvljo0v01pq5bhvnju09m.apps.googleusercontent.com");
@@ -68,8 +72,7 @@ class Process_Image extends AsyncTask<Void, Void, String> {
             conn.setRequestMethod("POST");
             OutputStream os = conn.getOutputStream();
             OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
-
-            //osw.write(R.string.image_body);
+            osw.write(obj.toString());
             osw.flush();
             osw.close();
             os.close();  //don't forget to close the OutputStream
