@@ -41,6 +41,7 @@
         android:layout_marginBottom="8dp"
         android:text="@string/analyze_button_text"
         android:textSize="@dimen/upload_button_text_size"
+        android:enabled="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

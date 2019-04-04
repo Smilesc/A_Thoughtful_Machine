@@ -6,6 +6,7 @@
 
     <string name="start_button_text">Start</string>
     <string name="description_button_text">How does it work?</string>
+    <string name="description">Machine learning was used to train a model from a data set of images and corresponding emotions. When a new image is sent to that model, it makes predictions for it, based on what it\'s learned.</string>
 
 
     //Select_Image
@@ -14,4 +15,11 @@
 
     //Loading Screen
     <string name="loading_text">Analyzing</string>
+
+    //Prediction Result
+    <string name="prediction_text">I feel %s</string>
+    <string name="comma">,\u0020</string>
+    <string name="space">\u0020</string>
+    <string name="and">and\u0020</string>
+    <string name="try_another">Try another</string>
 </resources>

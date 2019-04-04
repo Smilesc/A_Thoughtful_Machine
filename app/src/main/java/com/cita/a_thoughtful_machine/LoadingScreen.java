@@ -12,11 +12,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,8 +27,8 @@ public class LoadingScreen extends AppCompatActivity {
     Uri selectedImage;
     int i_width;
     int i_height;
-    Bitmap image;
-    JSONObject obj;
+    Bitmap img_bitmap;
+    JSONObject img_data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +46,9 @@ public class LoadingScreen extends AppCompatActivity {
 
         try {
             JSONArray jsonArray = new JSONArray(pixel_array);
-            obj = new JSONObject();
+            img_data = new JSONObject();
 
-            obj.put("instances", jsonArray);
+            img_data.put("instances", jsonArray);
         } catch (org.json.JSONException je) {
             System.out.println(je.getMessage());
         }
@@ -68,15 +65,13 @@ public class LoadingScreen extends AppCompatActivity {
                 Bundle bundle = result.getResult();
                 String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
                 System.out.println("TOKEN: " + token);
-                process_image = new Process_Image(progressBar, token, image, obj, getApplicationContext());
+                process_image = new Process_Image(progressBar, token, img_bitmap, img_data, getApplicationContext(), selectedImage);
                 process_image.execute();
             } catch (Exception e) {
                 System.out.println("SOMETHING WENT WRONG: " + e.getMessage());
             }
-
             // The token is a named value in the bundle. The name of the value
             // is stored in the constant AccountManager.KEY_AUTHTOKEN.
-
         }
     }
 
@@ -110,13 +105,13 @@ public class LoadingScreen extends AppCompatActivity {
         Bitmap cropped_image = createImage();
 
         try {
-            image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), image_URI);
+            img_bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), image_URI);
         } catch (IOException io) {
             System.out.println(io.getMessage());
         }
 
-        float height = image.getHeight();
-        float width = image.getWidth();
+        float height = img_bitmap.getHeight();
+        float width = img_bitmap.getWidth();
 
         float x_offset = 0;
         float y_offset = 0;
@@ -139,9 +134,8 @@ public class LoadingScreen extends AppCompatActivity {
         int i_x_offset = (int) x_offset;
         int i_y_offset = (int) y_offset;
 
-        Bitmap scaled_image = Bitmap.createScaledBitmap(image, i_width, i_height, true);
+        Bitmap scaled_image = Bitmap.createScaledBitmap(img_bitmap, i_width, i_height, true);
 
-        imageView.setImageBitmap(scaled_image);
         int pix_x_si = 0;
         int pix_y_si = 0;
         for (int pix_x = i_x_offset; pix_x < i_width + i_x_offset; pix_x++) {
@@ -163,13 +157,12 @@ public class LoadingScreen extends AppCompatActivity {
         Account myAccount_ = accounts[0];
         Bundle options = new Bundle();
 
-        am.getAuthToken(
-                myAccount_,                     // Account retrieved using getAccountsByType()
-                "oauth2:https://www.googleapis.com/auth/cloud-platform",            // Auth scope
-                options,                        // Authenticator-specific options
-                true,                           // Your activity
-                new OnTokenAcquired(),          // Callback called when a token is successfully acquired
-                new Handler(new OnError()));    // Callback called if an error occurs
+        am.getAuthToken(myAccount_,
+                "oauth2:https://www.googleapis.com/auth/cloud-platform",
+                options,
+                true,
+                new OnTokenAcquired(),
+                new Handler(new OnError()));
 
     }
 

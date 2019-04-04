@@ -13,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".PredictionResult"></activity>
+        <activity android:name=".Description"></activity>
+        <activity android:name=".PredictionResult" />
         <activity android:name=".LoadingScreen" />
         <activity android:name=".Select_Image" />
         <activity android:name=".MainActivity">
