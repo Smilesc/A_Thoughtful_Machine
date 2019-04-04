@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">A_Thoughtful_Machine</string>
+    <string name="app_name">A Thoughtful Machine</string>
 
     //MainActivity
     <string name="title_text">A\nThoughtful\nMachine</string>
@@ -22,4 +22,5 @@
     <string name="space">\u0020</string>
     <string name="and">and\u0020</string>
     <string name="try_another">Try another</string>
+    <string name="no_result">I don\'t feel anything</string>
 </resources>

@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-class Process_Image extends AsyncTask<Void, Void, String> {
+class PredictionRequest extends AsyncTask<Void, Void, String> {
 
     private Exception exception;
     ProgressBar progressBar;
@@ -36,7 +36,7 @@ class Process_Image extends AsyncTask<Void, Void, String> {
     Context context;
     Uri img_URI;
 
-    public Process_Image(ProgressBar p, String token, Bitmap img_bitmap, JSONObject img_data, Context context, Uri imgURI) {
+    public PredictionRequest(ProgressBar p, String token, Bitmap img_bitmap, JSONObject img_data, Context context, Uri imgURI) {
         this.progressBar = p;
         this.token = token;
         this.img_bitmap = img_bitmap;

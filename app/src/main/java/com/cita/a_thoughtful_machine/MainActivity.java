@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
         start_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), Select_Image.class);
+                Intent i = new Intent(getApplicationContext(), SelectImage.class);
                 startActivity(i);
             }
         });

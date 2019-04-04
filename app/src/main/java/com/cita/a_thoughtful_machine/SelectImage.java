@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
-public class Select_Image extends AppCompatActivity {
+public class SelectImage extends AppCompatActivity {
     Button upload_button;
     Button analyze_button;
     ImageView imageView;
@@ -35,7 +35,7 @@ public class Select_Image extends AppCompatActivity {
         analyze_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                final Intent intent = new Intent(Select_Image.this, LoadingScreen.class);
+                final Intent intent = new Intent(SelectImage.this, LoadingScreen.class);
                 intent.setData(selectedImage);
                 startActivity(intent);
             }

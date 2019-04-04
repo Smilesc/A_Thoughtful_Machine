@@ -23,7 +23,7 @@ import java.io.IOException;
 public class LoadingScreen extends AppCompatActivity {
     ImageView imageView;
     ProgressBar progressBar;
-    Process_Image process_image;
+    PredictionRequest predictionRequest;
     Uri selectedImage;
     int i_width;
     int i_height;
@@ -65,8 +65,8 @@ public class LoadingScreen extends AppCompatActivity {
                 Bundle bundle = result.getResult();
                 String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
                 System.out.println("TOKEN: " + token);
-                process_image = new Process_Image(progressBar, token, img_bitmap, img_data, getApplicationContext(), selectedImage);
-                process_image.execute();
+                predictionRequest = new PredictionRequest(progressBar, token, img_bitmap, img_data, getApplicationContext(), selectedImage);
+                predictionRequest.execute();
             } catch (Exception e) {
                 System.out.println("SOMETHING WENT WRONG: " + e.getMessage());
             }

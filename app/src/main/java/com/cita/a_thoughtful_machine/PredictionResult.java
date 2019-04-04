@@ -56,27 +56,33 @@ public class PredictionResult extends AppCompatActivity {
 
 
         StringBuilder emotion_list = new StringBuilder();
-        if (true_predictions.size() == 1) {
-            emotion_list.append(true_predictions.get(0));
-        } else if (true_predictions.size() == 2) {
-            emotion_list.append(true_predictions.get(0));
-            emotion_list.append(getResources().getString(R.string.space));
-            emotion_list.append(getResources().getString(R.string.and));
-            emotion_list.append(true_predictions.get(1));
-        } else {
-            for (int k = 0; k < true_predictions.size() - 1; k++) {
-                emotion_list.append(true_predictions.get(k));
-                emotion_list.append(getResources().getString(R.string.comma));
-            }
-            emotion_list.append(getResources().getString(R.string.and));
-            emotion_list.append(true_predictions.get(true_predictions.size() - 1));
+        if(true_predictions.size() == 0){
+            prediction_result.setText(getResources().getString(R.string.no_result));
         }
-        prediction_result.setText(getResources().getString(R.string.prediction_text, emotion_list.toString()));
+        else{
+            if (true_predictions.size() == 1) {
+                emotion_list.append(true_predictions.get(0));
+            } else if (true_predictions.size() == 2) {
+                emotion_list.append(true_predictions.get(0));
+                emotion_list.append(getResources().getString(R.string.space));
+                emotion_list.append(getResources().getString(R.string.and));
+                emotion_list.append(true_predictions.get(1));
+            } else {
+                for (int k = 0; k < true_predictions.size() - 1; k++) {
+                    emotion_list.append(true_predictions.get(k));
+                    emotion_list.append(getResources().getString(R.string.comma));
+                }
+                emotion_list.append(getResources().getString(R.string.and));
+                emotion_list.append(true_predictions.get(true_predictions.size() - 1));
+            }
+            prediction_result.setText(getResources().getString(R.string.prediction_text, emotion_list.toString()));
+        }
+
 
         try_another.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), Select_Image.class);
+                Intent intent = new Intent(getApplicationContext(), SelectImage.class);
                 startActivity(intent);
             }
         });
