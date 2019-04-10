@@ -41,7 +41,9 @@ public class LoadingScreen extends AppCompatActivity {
 
         imageView.setImageURI(selectedImage);
 
-        Bitmap cropped_image = cropImageIntoBox(selectedImage);
+        Bitmap cropped_image = cropImage(selectedImage);
+
+        imageView.setImageBitmap(cropped_image);
         int[][] pixel_array = getRGBValues(cropped_image);
 
         try {
@@ -76,6 +78,10 @@ public class LoadingScreen extends AppCompatActivity {
     }
 
     private int[][] getRGBValues(Bitmap bitmap) {
+        System.out.println("i_width before: " + i_width);
+        System.out.println("i_height before: " + i_height);
+        i_width = 200;
+        i_height = 200;
         int[] img_argb = new int[40000];
         bitmap.getPixels(img_argb, 0, i_width, 0, 0, i_width, i_height);
 
@@ -99,6 +105,77 @@ public class LoadingScreen extends AppCompatActivity {
 
         }
         return img_rgb;
+    }
+
+
+    private Bitmap cropImage(Uri image_URI) {
+        Bitmap cropped_image = createImage();
+
+        try {
+            img_bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), image_URI);
+        } catch (IOException io) {
+            System.out.println(io.getMessage());
+        }
+
+        float height = img_bitmap.getHeight();
+        float width = img_bitmap.getWidth();
+
+        float x_offset = 0;
+        float y_offset = 0;
+
+        boolean height_larger;
+
+        if (height >= width) {
+            height_larger = true;
+            height = Math.round((200 / width) * height);
+            width = 200;
+
+            y_offset = (height - 200) / 2;
+
+        } else {
+            height_larger = false;
+            width = Math.round((200 / height) * width);
+            height = 200;
+
+            x_offset = (width - 200) / 2;
+
+        }
+
+        i_width = (int) width;
+        i_height = (int) height;
+
+        int i_x_offset = (int) x_offset;
+        int i_y_offset = (int) y_offset;
+
+        Bitmap scaled_image = Bitmap.createScaledBitmap(img_bitmap, i_width, i_height, true);
+
+        int cropped_img_x = 0;
+        int cropped_img_y = 0;
+
+        if(height_larger) {
+            for (int y = i_y_offset; y < i_height - i_y_offset - 1; y++) {
+                for (int x = 0; x < cropped_image.getWidth(); x++) {
+                    cropped_image.setPixel(cropped_img_x, cropped_img_y,
+                            scaled_image.getPixel(x, y));
+                    cropped_img_x++;
+                }
+                cropped_img_x = 0;
+                cropped_img_y++;
+            }
+
+        } else {
+            for (int x = i_x_offset; x < i_width - i_x_offset - 1; x++) {
+                for (int y = 0; y < cropped_image.getHeight(); y++) {
+                    cropped_image.setPixel(cropped_img_x, cropped_img_y,
+                            scaled_image.getPixel(x, y));
+                    cropped_img_y++;
+                }
+                cropped_img_y = 0;
+                cropped_img_x++;
+            }
+
+        }
+        return cropped_image;
     }
 
     private Bitmap cropImageIntoBox(Uri image_URI) {
