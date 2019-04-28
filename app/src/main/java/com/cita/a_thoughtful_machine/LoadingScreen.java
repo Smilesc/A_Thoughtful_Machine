@@ -6,6 +6,7 @@ import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,8 +42,10 @@ public class LoadingScreen extends AppCompatActivity {
 
         imageView.setImageURI(selectedImage);
 
-        Bitmap cropped_image = cropImageIntoBox(selectedImage);
-        int[][] pixel_array = getRGBValues(cropped_image);
+        Bitmap cropped_image = cropImage(selectedImage);
+
+        imageView.setImageBitmap(cropped_image);
+        double[][] pixel_array = getRGBValues(cropped_image);
 
         try {
             JSONArray jsonArray = new JSONArray(pixel_array);
@@ -75,11 +78,18 @@ public class LoadingScreen extends AppCompatActivity {
         }
     }
 
-    private int[][] getRGBValues(Bitmap bitmap) {
+    private double[][] getRGBValues(Bitmap bitmap) {
+        System.out.println("i_width before: " + i_width);
+        System.out.println("i_height before: " + i_height);
+        i_width = 200;
+        i_height = 200;
         int[] img_argb = new int[40000];
         bitmap.getPixels(img_argb, 0, i_width, 0, 0, i_width, i_height);
 
         int[][] img_rgb = new int[1][120000];
+        double[][] img_hsv = new double[1][120000];
+
+        float[] hsv = new float[3];
 
         int i = 0;
 
@@ -91,14 +101,108 @@ public class LoadingScreen extends AppCompatActivity {
                 int G = (img_argb[index] >> 8) & 0xff;
                 int B = img_argb[index] & 0xff;
 
-                img_rgb[0][i] = R;
-                img_rgb[0][i + 1] = G;
-                img_rgb[0][i + 2] = B;
+//                if (i == 0) {
+//                    System.out.println("OUTTTTTTT" + R + " " + G + " " + B);
+//                }
+//                img_rgb[0][i] = R;
+//                img_rgb[0][i + 1] = G;
+//                img_rgb[0][i + 2] = B;
+
+                Color.RGBToHSV(R, G, B, hsv);
+
+
+                img_hsv[0][i] = Math.round(hsv[0] * 1000.0)/ 1000.0;
+                img_hsv[0][i + 1] = Math.round(hsv[1]* 100000.0)/ 1000.0;
+                img_hsv[0][i + 2] = Math.round(hsv[2] * 100000.0)/ 1000.0;
+
+                if (i == 0) {
+                    System.out.println("RGB: " + R + " " + G + " " + B);
+                    System.out.print("ORIGINAL HSV");
+                    for(int d = 0; d < hsv.length; d++){
+                        System.out.println(" " + hsv[d]);
+                    }
+                    System.out.println("HSVVVVVV: " + img_hsv[0][i] + " " + img_hsv[0][i + 1] + " " + img_hsv[0][i + 2]);
+                }
+
                 i += 3;
             }
 
         }
-        return img_rgb;
+
+//        Color.RGBToHSV(img);
+        System.out.println("HEYYYY: " + img_hsv[0][0] + ' ' + img_hsv[0][1] + ' ' +  img_hsv[0][2]);
+        return img_hsv;
+    }
+
+
+    private Bitmap cropImage(Uri image_URI) {
+        Bitmap cropped_image = createImage();
+
+        try {
+            img_bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), image_URI);
+        } catch (IOException io) {
+            System.out.println(io.getMessage());
+        }
+
+        float height = img_bitmap.getHeight();
+        float width = img_bitmap.getWidth();
+
+        float x_offset = 0;
+        float y_offset = 0;
+
+        boolean height_larger;
+
+        if (height >= width) {
+            height_larger = true;
+            height = Math.round((200 / width) * height);
+            width = 200;
+
+            y_offset = (height - 200) / 2;
+
+        } else {
+            height_larger = false;
+            width = Math.round((200 / height) * width);
+            height = 200;
+
+            x_offset = (width - 200) / 2;
+
+        }
+
+        i_width = (int) width;
+        i_height = (int) height;
+
+        int i_x_offset = (int) x_offset;
+        int i_y_offset = (int) y_offset;
+
+        Bitmap scaled_image = Bitmap.createScaledBitmap(img_bitmap, i_width, i_height, true);
+
+        int cropped_img_x = 0;
+        int cropped_img_y = 0;
+
+        if(height_larger) {
+            for (int y = i_y_offset; y < i_height - i_y_offset - 1; y++) {
+                for (int x = 0; x < cropped_image.getWidth(); x++) {
+                    cropped_image.setPixel(cropped_img_x, cropped_img_y,
+                            scaled_image.getPixel(x, y));
+                    cropped_img_x++;
+                }
+                cropped_img_x = 0;
+                cropped_img_y++;
+            }
+
+        } else {
+            for (int x = i_x_offset; x < i_width - i_x_offset - 1; x++) {
+                for (int y = 0; y < cropped_image.getHeight(); y++) {
+                    cropped_image.setPixel(cropped_img_x, cropped_img_y,
+                            scaled_image.getPixel(x, y));
+                    cropped_img_y++;
+                }
+                cropped_img_y = 0;
+                cropped_img_x++;
+            }
+
+        }
+        return cropped_image;
     }
 
     private Bitmap cropImageIntoBox(Uri image_URI) {
