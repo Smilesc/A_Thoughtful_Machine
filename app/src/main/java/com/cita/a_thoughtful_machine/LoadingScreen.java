@@ -43,7 +43,6 @@ public class LoadingScreen extends AppCompatActivity {
 
         Bitmap cropped_image = cropImage(selectedImage);
 
-        imageView.setImageBitmap(cropped_image);
         int[][] pixel_array = getRGBValues(cropped_image);
 
         try {
