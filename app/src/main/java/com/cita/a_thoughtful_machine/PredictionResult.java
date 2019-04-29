@@ -87,4 +87,12 @@ public class PredictionResult extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        Intent i = new Intent(this, MainActivity.class);
+        startActivity(i);
+    }
 }
